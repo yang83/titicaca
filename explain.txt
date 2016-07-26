@@ -1,0 +1,44 @@
+titicaca패키지에 관하여.
+
+fiss_rotate_pixel_position : 
+
+        FISS 데이터를 readfits로 읽었을 때 얻게 되는 회전 보정이 되지 않은 영상에서 특정 픽셀 정보를 뽑아내고 싶을 때. 
+	reference file은 (x1, y1)정보를 얻고자 하는 정보다. 즉, reference file의 (x1, y1)이 가리키는 위치의 시간에 따른 스펙트럼을 뽑고자 하면 
+	fiss_rotate_pixel_position(file_array, x1, y1, reference_filename)
+	을 하면 각 file_array마다의 픽셀 정보 (각 시간대마다 x1, y1과 같은 위치를 가리키는 픽셀)를 돌려준다.
+
+fiss_original_pixel_position_before_rotnshfit :
+	FISS데이터를 rotation할 때 긴 축을 따라서 이미지를 키운 다음 회전시키게 된다. 회전 후에 이미지에서 어떤 픽셀이 회전 전의 readfits로 읽어낸 raw영상에서 매칭되는 픽셀을 찾으려면 이 함수를 쓴다.
+	res1=fiss_original_pixel_position_before_rotnshift(fA1[0], x, y)
+	
+	fA1의 0번째 영상의 rotnshift를 겪은 정사각형 영상의 x, y좌표와 매칭되는 좌표정보가 res1[0], res1[1]이다.
+
+asc2pix
+	fissmap영상에서 asc정보를 pixel정보로 변환
+
+	우리가 fissmap에서 어떤 지점을 클릭하고 그 지점의 스펙트럼을 전 시간대에 걸쳐서 모으고 싶다면,
+	===============================================
+	fiss2map, filename, fissmap, /rotnshift
+	plot_map, fissmap
+	cursor, x, y, /data
+	res1=asc2pix(x, y)
+	res2=fiss_original_pixel_position_before_rotnshift(filename, res1[0], res1[1])
+
+	res3=fiss_rotate_pixel_position(file_array, res2[0], res2[1], filename)
+	
+	result=!NULL
+	for k=0, n_elements(file_array)-1 do begin
+		im=readfits(file_array[k], h)
+		result=[[result], [im[*, res3[0], res3[1]]]]
+	endfor
+	
+	===============================================
+	또는
+	===============================================
+	fiss2map, filename, fissmap, /rotnshift
+	plot_map, fissmap
+	cursor, x, y, /data
+	res1=asc2pix(x, y)
+	res2=fiss_original_pixel_position_before_rotnshift(filename, res1[0], res1[1])
+	result=fiss_rotate_read_pixel(file_array, res2[0], res2[1], filename)
+	===============================================
