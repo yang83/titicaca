@@ -58,10 +58,10 @@ pro fiss2map, filename,  map,wv=wv, xc=xc, yc=yc, dx=dx, dy=dy, pca=pca, FWHM=FW
 ;Jan 14 2015, Heesu Yang : wv=0 if wv is not set.
 ;Jan 15 2015, Heesu Yang : add function make_fissmap to output maparr
 ;Jan 15 2015, Heesu Yang : ENLARGE keyword added.
+;Jul 27 2016, Heesu Yang : function changed from 'fiss_readfits_heesu' to fiss_readfits_y'
 
 
-
-	im=fiss_readfits_heesu(filename, wlha, hHa, pca=pca, rotnshift=rotnshift, ENLARGE=ENLARGE, /FOR_MAPSTRUCTURE)
+	im=fiss_readfits_y(filename, wlha, hHa, pca=pca, rotnshift=rotnshift, ENLARGE=ENLARGE, /FOR_MAPSTRUCTURE)
         fissmaparr=!NULL
         FOR i=0, N_ELEMENTS(wv)-1 DO BEGIN
                 im1=im
