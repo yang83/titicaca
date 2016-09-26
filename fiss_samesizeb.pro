@@ -5,7 +5,7 @@ pro fiss_samesizeb, fB, shiftx
 		imB=readfits(fB[i], h)
 		szb=SIZE(imB, /DIMENSION)
 		if szb[1] eq 250 then begin
-			imB_new=FLTARR(szb[0], 256, szb[2])
+			imB_new=INTARR(szb[0], 256, szb[2])
 			imB_new[*, 0:249, *]=imB
 			imB_new=shift(imB_new, 0, shiftx, 0)
 		endif else begin	
