@@ -13,12 +13,12 @@ FUNCTION PIX2ASC, PIXEL_POST, MAP_STRUCTURE
 
 	R_PIXEL_POS=[0., 0.]
         IF N_ELEMENTS(PIXEL_POST) eq 2 THEN $
-            PIXEL_POST2  =       [[PIXEL_POST[0], 0, 0], [PIXEL_POST[1], 0, 0]]
+            PIXEL_POST2  =       [[PIXEL_POST[0], 0, 0], [PIXEL_POST[1], 0, 0]] ELSE PIXEL_POST2=PIXEL_POST
 
 
 	FOR i=0, N_ELEMENTS(PIXEL_POST2)/2.-1 DO $
 		R_PIXEL_POS= [[R_PIXEL_POS], [reform((PIXEL_POST2[i, *]-imsize/2.)*[dx, dy]+[xc, yc])]]
-	
+
 	s=size(R_PIXEL_POS, /DIMENSION)
 	R_PIXEL_POS2=FLTARR(s[1], s[0])
 	R_PIXEL_POS2[*, 0]=R_PIXEL_POS[0, *]

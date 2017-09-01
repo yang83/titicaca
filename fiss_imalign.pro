@@ -50,7 +50,7 @@ IF NOT KEYWORD_SET(REFERENCE_ROT_ANGLE) THEN $
 	m_window	=	WINDOW_SIZE
 	
 	IF NOT KEYWORD_SET(POSX) THEN BEGIN
-		window, xs=500, ys=500
+		window, xs=1024, ys=1024
 		tvscl, image1[20, *, *]
 		print, 'Click reference position.'
 		cursor, x, y, /device

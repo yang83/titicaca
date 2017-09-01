@@ -13,7 +13,8 @@ function make_fissmap, im, wlha, hHa, SQUARE=SQUARE, FWHM=FWHM, XC=XC, YC=YC, DX
 	if not keyword_set(dx) then dx=x_pixelscale
 	if not keyword_set(dy) then dy=y_pixelscale
 	if not keyword_set(wavelength) then wavelength=0.
-	
+        ;if keyword_set(fxpar(hHa, 'REFWV')) then wavelength=fxpar(hHa, 'REFWV')
+
 
 
         centerpx=where(abs(wlha-wavelength) eq min(abs(wlha-wavelength)))
@@ -41,7 +42,6 @@ function make_fissmap, im, wlha, hHa, SQUARE=SQUARE, FWHM=FWHM, XC=XC, YC=YC, DX
                 yrange=(ROUND(max(sz)-sz[1])/2.)+[0., sz[1]-1]
                 im2[xrange[0]:xrange[1], yrange[0]:yrange[1]]=im1
         ENDIF
-        
 	return, make_map(reform(im2), dx=dx, dy=dy, xc=xc, yc=yc, title=m_title, TIME=m_time)
 end
 
