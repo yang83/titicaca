@@ -6,7 +6,7 @@ function most_nearest_wv, wlha, wvs
 end
 
 
-pro mkpng_h, fiss_filename_arrayA, fiss_filename_arrayB, MAGNIFY=MAGNIFY, FOV=FOV, ROTNSHIFT=ROTNSHIFT, SIGMA=SIGMA, NO_WVCALIB=NO_WVCALIB, WAVELENGTH_HA=WAVELENGTH_HA, WAVELENGTH_CA=WAVELENGTH_CA
+pro mkpng_h2, fiss_filename_arrayA, fiss_filename_arrayB, MAGNIFY=MAGNIFY, FOV=FOV, ROTNSHIFT=ROTNSHIFT, SIGMA=SIGMA, NO_WVCALIB=NO_WVCALIB, WAVELENGTH_HA=WAVELENGTH_HA, WAVELENGTH_CA=WAVELENGTH_CA
 
 fA=fiss_filename_arrayA
 fB=fiss_find_co_observed_bfile(fA, fiss_filename_arrayB)
@@ -43,46 +43,38 @@ ENDIF
 
 !P.FONT=1
 window, 1
-FOV=FOV*MAGNIFY		
+FOV=FOV*MAGNIFY
+
+
+scrollwindow, wid=1, xs=(FOV[2]-FOV[0]+1)*4, ys=(FOV[3]-FOV[1]+1)*2	
+;scrollwindow, xs=512*4, ys=512*2
 for i=0, n_elements(fA)-1 do begin
 	
-		imA=fiss_readfits_y(fA[i], wlha1, hha, /NO_WVCALIB, ROTNSHIFT=ROTNSHIFT, MAGNIFY=MAGNIFY)
                 imA_norot=fiss_readfits_y(fA[i], wlhat, hhat, /no_wvcalib)
                 sAt=size(imA, /DIMENSION)
-IF NOT KEYWORD_SET(NO_WVCALIB) THEN BEGIN 
-                fiss_wv_calib, '6562', total(total(imA, 3), 2), wvpar1, method=0
-		wlha=(findgen(512)-wvpar1[0])*wvpar1[1]+wvpar1[2]-6562.817d0
-ENDIF
-		if fB[i] ne ' ' then begin
-			imB=fiss_readfits_y(fB[i], wlca1, hca, /NO_WVCALIB, ROTNSHIFT=ROTNSHIFT, MAGNIFY=MAGNIFY) 
+                fiss2map, fA[i], fa_map, WV=WAVELENGTH_HA, /NO_WVCALIB, ROTNSHIFT=ROTNSHIFT
+                
+                if fB[i] ne ' ' then begin
+                        fiss2map, fB[i], fb_map, WV=WAVELENGTH_CA, /NO_WVCALIB, ROTNSHIFT=ROTNSHIFT
                         imB_norot=fiss_readfits_y(fB[i], wlcat, hcat, /no_wvcalib)
                         sBt=size(imB, /DIMENSION)
-			IF NOT KEYWORD_SET(NO_WVCALIB) THEN BEGIN
-                                fiss_wv_calib, '8542', total(total(imB, 3), 2), wvpar1, method=0
-	        		wlca=(findgen(502)-wvpar1[0])*wvpar1[1]+wvpar1[2]-8542.09d0
-		        ENDIF
                 endif else begin
-			sBt=[sAt[0], 250, sAt[2]]
+			sBt=[sAt[0], 256, sAt[2]]
 			imB=FLTARR(sBt)
 		endelse
 		if m_FOV eq 0 then FOV=[0,0, sBt[1]-1, sBt[2]-1]
 	        pos=most_nearest_wv(wlha, WAVELENGTH_HA)
-		fA_im=imA[pos, FOV[0]:FOV[2], FOV[1]:FOV[3]]
 	        fa_im_norot=imA_norot[pos, *, *]	
 		pos=most_nearest_wv(wlca, WAVELENGTH_CA)
-		fB_im=imB[pos, FOV[0]:FOV[2], FOV[1]:FOV[3]]
 		fb_im_norot=imB_norot[pos, *, *]
 	
 		sA=size(fA_im, /DIMENSION)
 		sB=size(fB_im, /DIMENSION)
 ;		wdelete, 1
-		scrollwindow, wid=1, xs=(FOV[2]-FOV[0]+1)*4, ys=(FOV[3]-FOV[1]+1)*2
-	
 		meanimA=FLTARR(4) & meanimB=FLTARR(4)
 		stddevimA=FLTARR(4) & stddevimB=FLTARR(4)
+                dr_a=FLTARR(4, 2) & dr_b=FLTARR(4, 2)
 		for k=0, 3 do begin
-			fA_im_temp		=reform(fA_im[k, *, *])
-			fB_im_temp		=reform(fB_im[k, *, *])
                         fa_im_temp_norot             =reform(fA_im_norot[k, *, *])
                         fb_im_temp_norot             =reform(fB_im_norot[k, *, *])
 			meanimA[k]		=median	(fA_im_temp_norot[where(fA_im_temp_norot ne 0.)])
@@ -90,25 +82,32 @@ ENDIF
 			if total(fB_im_temp_norot) ne 0. then meanimB[k]		=median	(fB_im_temp_norot[where(fB_im_temp_norot ne 0.)])
 			if total(fB_im_temp_norot) ne 0. then stddevimB[k]	=stddev	(fB_im_temp_norot[where(fB_im_temp_norot ne 0.)])
 		
-			fA_im[k, *, *]	=BYTSCL	(fA_im[k, *, *], meanimA[k]-sigma[k*2]*stddevimA[k], meanimA[k]+sigma[k*2+1]*stddevimA[k])
-			fB_im[k, *, *]	=BYTSCL	(fB_im[k, *, *], meanimB[k]-sigma[8+k*2]*stddevimB[k], meanimB[k]+sigma[8+k*2+1]*stddevimB[k])
+			dr_a[k, *]=[meanimA[k]-sigma[k*2]*stddevimA[k], meanimA[k]+sigma[k*2+1]*stddevimA[k]]
+			dr_b[k, *]=[meanimB[k]-sigma[8+k*2]*stddevimB[k], meanimB[k]+sigma[8+k*2+1]*stddevimB[k]]
 		endfor
 		sAz=sA
 		sBz=sB
 ;	loadct, 3
+        IF i eq 0 THEN CENTER=[fa_map[0].xc, fa_map[0].yc]
 	loadct_ch, /ha
-	tv, congrid(reform(fA_im[0, *, *]), sAz[1], sAz[2]), sAz[1]*0, sAz[2]*1
-	tv, congrid(reform(fA_im[1, *, *]), sAz[1], sAz[2]), sAz[1]*1, sAz[2]*1
-	tv, congrid(reform(fA_im[2, *, *]), sAz[1], sAz[2]), sAz[1]*2, sAz[2]*1
-	tv, congrid(reform(fA_im[3, *, *]), sAz[1], sAz[2]), sAz[1]*3, sAz[2]*1
+        plot_map, fa_map[0], DRANGE=dr_a[0, *], POSITION=[0   , 0.5, 0.25, 1.0], XTITLE='', YTITLE='', /NOXTITLE, /NOYTITLE, /NOTITLE, XSTYLE=5, YSTYLE=5, CENTER=CENTER
+        plot_map, fa_map[1], DRANGE=dr_a[1, *], POSITION=[0.25, 0.5, 0.5 , 1.0], XTITLE='', YTITLE='', /NOXTITLE, /NOYTITLE, /NOTITLE, XSTYLE=5, YSTYLE=5, /NOERASE, CENTER=CENTER
+        plot_map, fa_map[2], DRANGE=dr_a[2, *], POSITION=[0.5 , 0.5, 0.75, 1.0], XTITLE='', YTITLE='', /NOXTITLE, /NOYTITLE, /NOTITLE, XSTYLE=5, YSTYLE=5, /NOERASE, CENTER=CENTER
+        plot_map, fa_map[3], DRANGE=dr_a[3, *], POSITION=[0.75, 0.5, 1.00, 1.0], XTITLE='', YTITLE='', /NOXTITLE, /NOYTITLE, /NOTITLE, XSTYLE=5, YSTYLE=5, /NOERASE, CENTER=CENTER
 
-;	loadct, 8
+
+
+        
+        ;	loadct, 8
 	loadct_ch, /ca
-	tv, congrid(reform(fB_im[0, *, *]), sBz[1], sBz[2]), sAz[1]*0, sAz[2]*0
-	tv, congrid(reform(fB_im[1, *, *]), sBz[1], sBz[2]), sAz[1]*1, sAz[2]*0
-	tv, congrid(reform(fB_im[2, *, *]), sBz[1], sBz[2]), sAz[1]*2, sAz[2]*0	
-	tv, congrid(reform(fB_im[3, *, *]), sBz[1], sBz[2]), sAz[1]*3, sAz[2]*0
-	
+
+        plot_map, fb_map[0], DRANGE=dr_b[0, *], POSITION=[0   , 0., 0.25, 0.5], XTITLE='', YTITLE='', /NOXTITLE, /NOYTITLE, /NOTITLE, XSTYLE=5, YSTYLE=5, /NOERASE, CENTER=CENTER
+        plot_map, fb_map[1], DRANGE=dr_b[1, *], POSITION=[0.25, 0., 0.5 , 0.5], XTITLE='', YTITLE='', /NOXTITLE, /NOYTITLE, /NOTITLE, XSTYLE=5, YSTYLE=5, /NOERASE, CENTER=CENTER
+        plot_map, fb_map[2], DRANGE=dr_b[2, *], POSITION=[0.5 , 0., 0.75, 0.5], XTITLE='', YTITLE='', /NOXTITLE, /NOYTITLE, /NOTITLE, XSTYLE=5, YSTYLE=5, /NOERASE, CENTER=CENTER
+        plot_map, fb_map[3], DRANGE=dr_b[3, *], POSITION=[0.75, 0., 1.00, 0.5], XTITLE='', YTITLE='', /NOXTITLE, /NOYTITLE, /NOTITLE, XSTYLE=5, YSTYLE=5, /NOERASE, CENTER=CENTER
+
+
+
 	draw_clock, sAz[1]*2, sAz[2], fxpar(hha, 'DATE'), COLOR=255, CLOCKSIZE=50
 
 	xyouts, 20, 		 sAz[2]+20, STRTRIM(STRING(WAVELENGTH_HA[0], FORMAT='(F4.1)'), 1)+STRING(197B), /DEVICE, COLOR=255, SIZE=3

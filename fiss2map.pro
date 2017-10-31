@@ -46,7 +46,7 @@ function make_fissmap, im, wlha, hHa, SQUARE=SQUARE, FWHM=FWHM, XC=XC, YC=YC, DX
 end
 
 
-pro fiss2map, filename,  map,wv=wv, xc=xc, yc=yc, dx=dx, dy=dy, pca=pca, FWHM=FWHM, ROTNSHIFT=ROTNSHIFT, SQUARE=SQUARE, ENLARGE=ENLARGE
+pro fiss2map, filename,  map,wv=wv, xc=xc, yc=yc, dx=dx, dy=dy, pca=pca, FWHM=FWHM, ROTNSHIFT=ROTNSHIFT, SQUARE=SQUARE, ENLARGE=ENLARGE, NO_WVCALIB=NO_WVCALIB
 	
 ;wv : wavelength of you want.
 ;xc : Image center in arcsec
@@ -61,7 +61,7 @@ pro fiss2map, filename,  map,wv=wv, xc=xc, yc=yc, dx=dx, dy=dy, pca=pca, FWHM=FW
 ;Jul 27 2016, Heesu Yang : function changed from 'fiss_readfits_heesu' to fiss_readfits_y'
 
 
-	im=fiss_readfits_y(filename, wlha, hHa, pca=pca, rotnshift=rotnshift, ENLARGE=ENLARGE, /FOR_MAPSTRUCTURE)
+	im=fiss_readfits_y(filename, wlha, hHa, pca=pca, rotnshift=rotnshift, ENLARGE=ENLARGE, NO_WVCALIB=NO_WVCALIB, /FOR_MAPSTRUCTURE)
         fissmaparr=!NULL
         FOR i=0, N_ELEMENTS(wv)-1 DO BEGIN
                 im1=im
