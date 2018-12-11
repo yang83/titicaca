@@ -19,7 +19,7 @@ pro niris2map, filename,  map, PARAMETER=PARAMETER, xc=xc, yc=yc, dx=dx, dy=dy, 
                 'theta'         : frame=1
                 'chi'           : frame=2
                 'eta0'          : frame=3
-                'dlambdaD'      : frame=4
+                'dlambdad'      : frame=4
                 'a'             : frame=5
                 'lambda0'       : frame=6
                 's0'            : frame=7

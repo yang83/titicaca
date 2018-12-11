@@ -1,6 +1,6 @@
 function make_fissmap, im, wlha, hHa, SQUARE=SQUARE, FWHM=FWHM, XC=XC, YC=YC, DX=DX, DY=DY, wavelength=wavelength
- 
-                
+
+
 
         m_time  =fxpar(hHa, 'DATE')
         x_pixelscale=fxpar(hHa, 'CDELT2')
@@ -18,16 +18,16 @@ function make_fissmap, im, wlha, hHa, SQUARE=SQUARE, FWHM=FWHM, XC=XC, YC=YC, DX
 
 
         centerpx=where(abs(wlha-wavelength) eq min(abs(wlha-wavelength)))
-	
+
 	CDELT1=fxpar(hHa, 'CDELT1');angstrom per pixel.
 
 	IF KEYWORD_SET(FWHM) THEN BEGIN
 		FWHM1=abs(FWHM/CDELT1)
 		kernel=gaussian_function(FWHM1, WIDTH=n_elements(im[*, 0, 0]), /NORMALIZE)
-		
+
 		kernel=shift(kernel, centerpx-n_elements(im[*, 0, 0])/2.)
 		;sample=replicate(1., n_elements(im[0, *, 0]))##kernel
-			
+
 		FOR k=0, n_elements(im[0, 0, *])-1 DO $
 			im[*, *, k]=im[*, *, k]*(replicate(1., n_elements(im[0, *, k]))##kernel)
 		im1=total(im, 1)
@@ -47,7 +47,7 @@ end
 
 
 pro fiss2map, filename,  map,wv=wv, xc=xc, yc=yc, dx=dx, dy=dy, pca=pca, FWHM=FWHM, ROTNSHIFT=ROTNSHIFT, SQUARE=SQUARE, ENLARGE=ENLARGE, NO_WVCALIB=NO_WVCALIB
-	
+
 ;wv : wavelength of you want.
 ;xc : Image center in arcsec
 ;yc : Image center in arcsec
