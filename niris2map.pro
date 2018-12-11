@@ -59,10 +59,22 @@ pro niris2map, filename,  map, PARAMETER=PARAMETER, xc=xc, yc=yc, dx=dx, dy=dy, 
                 IF KEYWORD_SET(ROTNSHIFT) THEN BEGIN
                     sz=size(im)
                     imx=MAKE_ARRAY(sz[2]*1.2, sz[3]*1.2, TYPE=sz[4], VALUE=MEDIAN(im[frame, *, *]))
-                    imx[sz[2]*0.1:sz[2]*1.1-1, sz[3]*0.1:sz[3]*1.1-1]=reform(im[frame, *, *])
-                    angle=0.
-                    angle=fxpar(h, 'ROTANGLE')
-                   imx=rot(imx, angle)
+                    
+                    if NOT STRCMP(STRLOWCASE(PARAMETER), 'chi') then begin
+                        imx[sz[2]*0.1:sz[2]*1.1-1, sz[3]*0.1:sz[3]*1.1-1]=reform(im[frame, *, *])
+                        angle=0.
+                        angle=fxpar(h, 'ROTANGLE')
+                        imx=rot(imx, angle)
+                    ENDIF ELSE BEGIN
+                        imx[sz[2]*0.1:sz[2]*1.1-1, sz[3]*0.1:sz[3]*1.1-1]=reform(im[frame, *, *])
+                        angle=0.
+                        angle=fxpar(h, 'ROTANGLE')
+                        imx=imx+angle/180.*!pi
+                        imx=imx mod !pi
+                        imx=rot(imx, angle)
+                    ENDELSE
+
+
                 ENDIF ELSE BEGIN
                     imx=im
                 ENDELSE
