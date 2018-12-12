@@ -4,7 +4,10 @@ function plot_mapf, map, XRANGE=XRANGE, YRANGE=YRANGE, SQUARE=SQUARE, DRANGE=DRA
         IF KEYWORD_SET(DRANGE) THEN BEGIN
             MIN_VALUE=DRANGE[0]
             MAX_VALUE=DRANGE[1]
-        ENDIF
+        ENDIF ELSE BEGIN
+            MIN_VALUE=min(map.data)
+            MAX_VALUE=max(map.data)
+        ENDELSE
         IF AXIS_STYLE eq !NULL THEN AXIS_STYLE=2
         IF NOT KEYWORD_SET(XRANGE) THEN XRANGE=[map.xc-map.dx*sz[0]/2., map.xc+map.dx*sz[0]/2.] 
         IF NOT KEYWORD_SET(YRANGE) THEN YRANGE=[map.yc-map.dy*sz[1]/2., map.yc+map.dy*sz[1]/2.]
@@ -29,6 +32,10 @@ function plot_mapf, map, XRANGE=XRANGE, YRANGE=YRANGE, SQUARE=SQUARE, DRANGE=DRA
             map.data=alog10(map.data)
             MIN_VALUE=alog10(MIN_VALUE)
             MAX_VALUE=alog10(MAX_VALUE)
+        ENDIF
+        IF AXIS_STYLE gt 4 THEN BEGIN
+            print, 'axis style error. ranged from 0 to 4'
+            return, 0
         ENDIF
         return, IMAGE(map.data, x, y, AXIS_STYLE=AXIS_STYLE, XRANGE=XRANGE, YRANGE=YRANGE, ASPECT_RATIO=ASPECT_RATIO, MIN_VALUE=MIN_VALUE, MAX_VALUE=MAX_VALUE, POSITION=POSITION, _STRICT_EXTRA=extra)
 
